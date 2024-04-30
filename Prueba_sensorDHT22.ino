@@ -3,12 +3,15 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Ethernet.h>
+#include <SoftwareSerial.h>
 
 #define DHTPin 3 //pin del arudino y sensor 
 
 #define DHTTYPE DHT22
 
 DHT dht(DHTPin, DHTTYPE);
+
+SoftwareSerial BT(10,11);
 
 const char *host = "localhost";
 const int port = 3000;
@@ -25,6 +28,7 @@ void setup(){
   Serial.begin(9600);
   //delay(2000);
   dht.begin();
+  BT.begin();
 }
 void loop(){
   if(!ejecucion){
