@@ -1,44 +1,36 @@
 #include <DHT.h>
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
 #include <SoftwareSerial.h>
 
-#define DHTPin 3 //pin del arudino y sensor 
+#define DHTPin 3 // Pin del Arduino y del sensor
 #define DHTTYPE DHT22
 
 DHT dht(DHTPin, DHTTYPE);
-
-SoftwareSerial BT(10,11); 
+SoftwareSerial BT(10, 11); // RX, TX para el módulo Bluetooth
 
 bool ejecucion = false;
 const int sensorHumedadS = A0;
 
 void setup() {
   Serial.begin(9600);
-  BT.begin(9600);
-  delay(000);
   dht.begin();
+  BT.begin(9600); // Inicializa la comunicación serie con el módulo Bluetooth
 }
 
 void loop() {
-  if(!ejecucion){
+  if (!ejecucion) {
     float h = dht.readHumidity();
     float tC = dht.readTemperature();
     float tF = dht.readTemperature(true);
     int hS = analogRead(sensorHumedadS);
 
-    String jsonString = createJsonString(h, tC, tF, hS);
-    Serial.println(jsonString);
+    // Envío de datos al dispositivo conectado a través de Bluetooth
+    String jsonPayload = createJsonString(h, tC, tF, hS);
+    BT.println(jsonPayload);
 
-    if(BT.available()){
-      BT.println(jsonString);
-    }
     ejecucion = true;
   }
-  // if(Serial.available()){
-  //   BT.write(Serial.read())
-  // }
 }
+
 String createJsonString(float h, float tC, float tF, int hS) {
-  return "{\"humedad\":" + String(h) + ",\"temperaturaC\":" + String(tC) + ",\"temperaturaF\":" + String(tF) + ",\"humedadSuelo\":" + String(hS) + "}";
+  return "{\"humedad\":" + String(h) + ",\"temperaturaC\":" + String(tC) + ",\"temperaturaF\":" + String(tF) + ",\"humedadS\":" + String(hS) + "}";
 }
