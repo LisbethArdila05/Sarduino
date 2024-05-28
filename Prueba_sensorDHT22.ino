@@ -3,7 +3,6 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Ethernet.h>
-#include <SoftwareSerial.h>
 
 #define DHTPin 3 //pin del arudino y sensor 
 
@@ -11,11 +10,8 @@
 
 DHT dht(DHTPin, DHTTYPE);
 
-SoftwareSerial BT(10,11);
-
 const char *host = "localhost";
 const int port = 3000;
-bool ejecucion = false;
 
 const int sensorHumedadS = A0;
 
@@ -28,17 +24,14 @@ void setup(){
   Serial.begin(9600);
   //delay(2000);
   dht.begin();
-  BT.begin();
 }
 void loop(){
-  if(!ejecucion){
-  //delay(2000);
     float h = dht.readHumidity();
     float tC = dht.readTemperature();
     float tF = dht.readTemperature(true);
     int hS = analogRead(sensorHumedadS);
 
-  //envio de variables
+  //envio de variables formato json
     String jsonPayload = createJsonString(h, tC, tF, hS);
     Serial.println(jsonPayload);
     client.post("/datos-sensor", "application/json", jsonPayload);
@@ -46,9 +39,7 @@ void loop(){
     if (client.post("/datos-sensor", "application/json", jsonPayload) == 0) {
       Serial.println("Error al enviar datos al servidor.");
     }
-    ejecucion = true;
-  }
-
+   delay(20000);
 }
 String createJsonString(float h, float tC, float tF, int hS){
   return "{\"humedad\":"+ String(h) + ",\"temperaturaC\":" + String(tC) + ",\"temperaturaF\":" + String(tF) + ",\"humedadS\":" + String(hS) + "}";
